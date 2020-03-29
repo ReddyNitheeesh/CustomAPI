@@ -1,7 +1,6 @@
-from flask import Flask,request
+from ..app import app
 from .routes import init_routes
 
-app=Flask(__name__)
 
 init_routes(app)
 
