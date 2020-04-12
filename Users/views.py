@@ -1,4 +1,4 @@
-from Database.models import Post,User
+from Database.models import User
 from flask import jsonify
 from Database import db
 from app import request
@@ -11,11 +11,14 @@ def createUser():
     input = request.json
     user = User.query.filter_by(username=input['username']).first()
     if user is None:
-        db.session.add(User(username=input['username'], email=input['email']))
-        db.session.commit()
+        try:
+            db.session.add(User(username=input['username'], email=input['email']))
+            db.session.commit()
+        except:
+            return jsonify("username or email is not unique"),400
     else:
         return jsonify("User already exist with username {}.Try with other username".format(user.username)),400
-    return jsonify("User created successfully with {}".format(user.username)),201
+    return jsonify("User created successfully with {}".format(input['username'])),201
 
 def updateUser(id):
     user = User.query.filter_by(id=id).first()
