@@ -1,40 +1,32 @@
 from Database.models import Post,User
 from flask import jsonify
 from Database import db
-from Posts import request,abort
+from app import request
 
+def getUsers():
+    Users = User.query.all()
+    return jsonify([{'id':u.id,'username':u.username,'email':u.email} for u in Users]),200
 
-def getPosts():
-    data=[]
-    posts = Post.query.all()
-    for p in posts:
-        data.append({'id':p.id,
-                     'username':p.author.username,
-                     'body':p.body
-                     })
-    return jsonify(data)
-
-def createPosts(id):
-    user = User.query.filter.filter_by(User_id=id).first()
-    if user is None:
-        #return "user does not exist with id {}".format(id)
-        return abort(400)
-    else:
-        input=request.json
-        post = Post(body=input['body'], author=user)
-        db.session.add(post)
-        db.session.commit()
-    return 'Created Post {}'.format(id)
-
-def updatePost(id):
-    post = Post.query.filter_by(id=id).first()
+def createUser():
     input = request.json
-    post.body = input['body']
-    db.session.commit()
-    return 'updated post id {}'.format(id)
+    user = User.query.filter_by(username=input['username']).first()
+    if user is None:
+        db.session.add(User(username=input['username'], email=input['email']))
+        db.session.commit()
+    else:
+        return jsonify("User already exist with username {}.Try with other username".format(user.username)),400
+    return jsonify("User created successfully with {}".format(user.username)),201
 
-def deletePost(id):
-    post = Post.query.filter_by(id=id).first()
-    db.session.delete(post)
-    return 'deleted post with id {}'.format(id)
+def updateUser(id):
+    user = User.query.filter_by(id=id).first()
+    input = request.json
+    user.email = input['email']
+    db.session.commit()
+    return jsonify('updated user with username {}'.format(user.username)),200
+
+def deleteUser(id):
+    user = User.query.filter_by(id=id).first()
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify('deleted user with username {}'.format(user.username)),200
 

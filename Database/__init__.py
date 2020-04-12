@@ -1,8 +1,10 @@
-from Posts import app
+from app import app
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+#some import error with migrate object need to fix
+#from flask_migrate import Migrate
 from settings import Config
 
 app.config.from_object(Config)
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+db.init_app(app)
+#migrate = Migrate(app, db)
