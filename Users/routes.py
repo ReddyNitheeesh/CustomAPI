@@ -1,10 +1,8 @@
 from . import views
 
 
-def init_routes(app):
+def init_user_routes(app):
     if app:
-        app.add_url_rule('/getUsers', 'getUsers', views.getUsers,methods=['GET'])
-        app.add_url_rule('/createUser', 'createUser', views.createUser,methods=['POST'])
-        app.add_url_rule('/updateUser/<int:id>', 'updateUser', views.updateUser,methods=['PUT'])
-        app.add_url_rule('/deleteUser/<int:id>', 'deleteUser', views.deleteUser, methods=['DELETE'])
-
+        app.add_url_rule('/api/users/create', 'new_user', views.new_user, methods=['POST'])
+        app.add_url_rule('/api/users/<int:id>', 'get_user', views.get_user, methods=['GET'])
+        app.add_url_rule('/api/users','get_all_users',views.get_all_users, methods=['GET'])

@@ -1,35 +1,38 @@
-from Database.models import User
-from flask import jsonify
-from Database import db
-from app import request
 
-def getUsers():
-    Users = User.query.all()
-    return jsonify([{'id':u.id,'username':u.username,'email':u.email} for u in Users]),200
+from flask import request, jsonify, url_for
 
-def createUser():
-    input = request.json
-    user = User.query.filter_by(username=input['username']).first()
-    if user is None:
-        try:
-            db.session.add(User(username=input['username'], email=input['email']))
-            db.session.commit()
-        except:
-            return jsonify("username or email is not unique"),400
-    else:
-        return jsonify("User already exist with username {}.Try with other username".format(user.username)),400
-    return jsonify("User created successfully with {}".format(input['username'])),201
+from auth import auth
+from database import db
+from .models import User
 
-def updateUser(id):
-    user = User.query.filter_by(id=id).first()
-    input = request.json
-    user.email = input['email']
+
+def new_user():
+    username = request.json.get('username')
+    password = request.json.get('password')
+    email = request.json.get('email')
+    if username is None or password is None or email is None:
+        return "username or password or email fields are required"  # missing arguments
+    if User.query.filter_by(username=username).first() is not None:
+        return "username is already taken"  # existing user
+    user = User(username=username)
+    user.email = email
+    user.hash_password(password)
+    db.session.add(user)
     db.session.commit()
-    return jsonify('updated user with username {}'.format(user.username)),200
 
-def deleteUser(id):
-    user = User.query.filter_by(id=id).first()
-    db.session.delete(user)
-    db.session.commit()
-    return jsonify('deleted user with username {}'.format(user.username)),200
+    return (jsonify("user created", {'username': user.username}), 201,
+            {'Location': url_for('get_user', id=user.id, _external=True)})
+
+@auth.login_required
+def get_all_users():
+    return jsonify([{'id': user.id, 'username': user.username, 'email': user.email} for user in User.query.all()])
+
+@auth.login_required
+def get_user(id):
+    user = User.query.get(id)
+    if not user:
+        return "user is not registered yet"
+    return jsonify({'username': user.username})
+
+
 

@@ -1,13 +1,20 @@
+import os
 
-from flask import Flask,request,abort
-app=Flask(__name__)
+from flask import Flask
 
-from Users import routes
-from Posts import routesposts
-from Database import db
+from DummyData import insert_dummy_data
+from database import db
 
-db.create_all();
+from routes import init_routes
 
-routes.init_routes(app)
-routesposts.init_routes(app)
+app = Flask(__name__)
+app.config.from_pyfile('settings.py')
+db.init_app(app)
+if not os.path.exists('database.db'):
+    with app.app_context():
+        db.create_all()
+        insert_dummy_data()
+init_routes(app)
 
+if __name__=='__main__':
+    app.run(host='0.0.0.0', port=5001)

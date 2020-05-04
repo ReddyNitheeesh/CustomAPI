@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  api-testing:
+    build:
+      context: . # define build path
+      dockerfile: Dockerfile # name of the dockerfile
+    image: api-testing
+    container_name: api-testing
+    ports:
+      - "4002:5001"
+    hostname: api # specify hostname
+    restart: on-failure # restart policy
